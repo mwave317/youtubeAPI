@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { Component } from 'react';
+import Searchbar from './components/searchbar';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
+import VideoList from './components/video_list';
+import YouTubeSearch from 'youtube-api-search';
+import VideoDetail from './components/videodetail';
+const API_KEY = 'AIzaSyDGQKXlMcKAxOrexG_JqnZfkA3YF5CSb2w';
 
-import App from './components/app';
-import reducers from './reducers';
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      videos: [],
+      selectedVideo: null,
+    };
 
-const createStoreWithMiddleware = applyMiddleware()(createStore);
+      //This is the same as this.setState({videos: videos})
+    this.videoSearch('surfboards');
+  }
 
-ReactDOM.render(
-  <Provider store={createStoreWithMiddleware(reducers)}>
-    <App />
-  </Provider>
-  , document.querySelector('.container'));
+  videoSearch(searchterm) {
+    YouTubeSearch({key: API_KEY, searchterm: searchterm}, (videos) => { //Intead of using data, I choose the same name as the key to shorten the code as shown below.
+      this.setState({
+        videos: videos,
+        selectedVideo: videos[0],
+      });
+       });
+  }
+  render() {
+return(
+  <div>
+<Searchbar onSearchTermChange={searchterm => this.videoSearch(searchterm)}/>
+<VideoDetail video={this.state.selectedVideo} />
+<VideoList
+onVideoSelect={selectedVideo =>this.setState({selectedVideo}) }
+videos={this.state.videos} />
+</div>
+);
+};
+};
+ReactDOM.render(<App/>, document.querySelector('.container'));
